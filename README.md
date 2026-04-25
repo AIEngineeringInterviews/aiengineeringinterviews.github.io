@@ -1,7 +1,7 @@
 # AI Engineering Interviews
 
 <p align="center">
-  <img src="assets/images/cover-photo.jpeg" alt="AI Engineering Interviews book cover" width="220">
+  <img src="assets/images/cover-photo.jpeg" alt="AI Engineering Interviews book cover" width="320">
 </p>
 
 Welcome to the companion website for *AI Engineering Interviews*.
@@ -10,7 +10,7 @@ Welcome to the companion website for *AI Engineering Interviews*.
 
 ## Prerequisite Chapters
 
-- [Math Foundations for Generative AI](prerequisites/math-prerequisite.html)
+- [Math Foundations for AI Engineering](prerequisites/math-prerequisite.html)
 - [PyTorch Tutorial for AI Engineering](prerequisites/pytorch-tutorial.html)
 
 ## Code
