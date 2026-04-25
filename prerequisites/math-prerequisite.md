@@ -88,7 +88,7 @@ A *norm* measures the magnitude (length) of a vector. The two most common norms 
 Cosine similarity, which normalizes vectors by their L2 norm before taking the dot product, is widely used in embedding search and retrieval:
 
 $$
-\text{cos\_sim}(\mathbf{a}, \mathbf{b}) =
+\text{cos-sim}(\mathbf{a}, \mathbf{b}) =
 \frac{\mathbf{a} \cdot \mathbf{b}}
 {\|\mathbf{a}\|_2 \, \|\mathbf{b}\|_2}
 $$
