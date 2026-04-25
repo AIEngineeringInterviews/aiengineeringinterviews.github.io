@@ -80,7 +80,12 @@ A *norm* measures the magnitude (length) of a vector. The two most common norms 
 - **L2 norm** (Euclidean): $\|\mathbf{x}\|_2 = \sqrt{\sum_i x_i^2}$. Used in cosine similarity, weight decay, and layer normalization.
 - **L1 norm** (Manhattan): $\|\mathbf{x}\|_1 = \sum_i |x_i|$. Encourages sparsity when used as a regularizer.
 
-Cosine similarity, which normalizes vectors by their L2 norm before taking the dot product, is widely used in embedding search and retrieval: $\text{cos_sim}(\mathbf{a}, \mathbf{b}) = \mathbf{a} \cdot \mathbf{b} \,/\, (\|\mathbf{a}\|_2 \, \|\mathbf{b}\|_2)$.
+Cosine similarity, which normalizes vectors by their L2 norm before taking the dot product, is widely used in embedding search and retrieval:
+
+```math
+\text{cos\_sim}(\mathbf{a}, \mathbf{b}) =
+\frac{\mathbf{a} \cdot \mathbf{b}}
+{\|\mathbf{a}\|_2 \, \|\mathbf{b}\|_2}
 
 ### Eigenvalues and Eigenvectors
 
