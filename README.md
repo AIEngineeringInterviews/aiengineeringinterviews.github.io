@@ -11,6 +11,7 @@ Welcome to the companion website for *AI Engineering Interviews*.
 ## Prerequisite Chapters
 
 - [Math Foundations for Generative AI](prerequisites/math-prerequisite.html)
+- [PyTorch Tutorial for AI Engineering](prerequisites/pytorch-tutorial.html)
 
 ## Code
 
