@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Math Foundations for Generative AI
+title: Math Foundations for AI Engineering
 ---
 
 # Math Foundations for AI Engineering
