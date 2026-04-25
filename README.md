@@ -1,10 +1,16 @@
 # AI Engineering Interviews
 
+<p align="center">
+  <img src="assets/images/cover-photo.jpeg" alt="AI Engineering Interviews book cover" width="320">
+</p>
+
 Welcome to the companion website for *AI Engineering Interviews*.
+
+*AI Engineering Interviews* is a practical guide to preparing for modern AI engineering and generative AI interviews.
 
 ## Prerequisite Chapters
 
-- [Math Foundations for Generative AI](prerequisites/math-prerequisite.md)
+- [Math Foundations for Generative AI](prerequisites/math-prerequisite.html)
 
 ## Code
 
