@@ -4,7 +4,7 @@ Welcome to the companion website for *AI Engineering Interviews*.
 
 ## Prerequisite Chapters
 
-- [Mathematics for AI Engineering](prerequisites/math-prerequisite.md)
+- [Math Foundations for Generative AI](prerequisites/math-prerequisite.md)
 
 ## Code
 
