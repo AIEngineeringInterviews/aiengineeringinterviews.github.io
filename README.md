@@ -1,7 +1,7 @@
 # AI Engineering Interviews
 
 <p align="center">
-  <img src="assets/images/cover-photo.jpeg" alt="AI Engineering Interviews book cover" width="180">
+  <img src="assets/images/cover-photo.jpeg" alt="AI Engineering Interviews book cover" width="220">
 </p>
 
 Welcome to the companion website for *AI Engineering Interviews*.
