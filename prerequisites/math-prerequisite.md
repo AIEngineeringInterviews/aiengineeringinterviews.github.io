@@ -1,3 +1,8 @@
+---
+layout: default
+title: Math Foundations for Generative AI
+---
+
 # Math Foundations for Generative AI
 
 Every operation an LLM performs, from understanding your question to generating each word of its response, is a mathematical operation. There is no magic behind the curtain, just well-orchestrated math. When a model decides that "mat" is the most likely next word after "the cat sat on the," it has computed dot products, applied a softmax function, and sampled from a probability distribution. When the model learned to make that prediction in the first place, calculus drove every weight update.
