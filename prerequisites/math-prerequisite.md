@@ -34,7 +34,7 @@ Figure 1 illustrates this hierarchy. Nearly every operation inside an LLM manipu
 The *dot product* of two vectors $\mathbf{a}$ and $\mathbf{b}$ is defined as:
 
 $$
-\mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^{d} a_i \, b_i
+\mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^{d} a_i \thinspace b_i
 $$
 
 In plain English, you multiply corresponding elements and add them up. The result is a single number that measures how similar two vectors are: if both vectors point in roughly the same direction, the dot product is large and positive; if they point in opposite directions, it is large and negative; if they are perpendicular (unrelated), it is close to zero.
@@ -64,7 +64,7 @@ $$
 Here $\mathbf{Q}$ (queries) represents "what am I looking for," $\mathbf{K}$ (keys) represents "what do I contain," and $\mathbf{V}$ (values) represents "what information do I carry." The attention output is:
 
 $$
-\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}\!\left(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d_k}}\right) \mathbf{V}
+\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d_k}}\right) \mathbf{V}
 $$
 
 Breaking this down step by step: $\mathbf{Q}\mathbf{K}^\top$ computes pairwise dot products between every query and every key, producing a $T \times T$ score matrix. Dividing by $\sqrt{d_k}$ prevents the dot products from growing too large (which would push softmax into regions with near-zero gradients). Softmax normalizes each row into a probability distribution. Finally, multiplying by $\mathbf{V}$ produces a weighted combination of value vectors: each output token is a blend of all input tokens, weighted by relevance.
@@ -82,15 +82,15 @@ Figure 2 traces this computation with a concrete example.
 ### Norms
 
 A *norm* measures the magnitude (length) of a vector. The two most common norms are:
-- **L2 norm** (Euclidean): $\|\mathbf{x}\|_2 = \sqrt{\sum_i x_i^2}$. Used in cosine similarity, weight decay, and layer normalization.
-- **L1 norm** (Manhattan): $\|\mathbf{x}\|_1 = \sum_i |x_i|$. Encourages sparsity when used as a regularizer.
+- **L2 norm** (Euclidean): $\Vert\mathbf{x}\Vert_2 = \sqrt{\sum_i x_i^2}$. Used in cosine similarity, weight decay, and layer normalization.
+- **L1 norm** (Manhattan): $\Vert\mathbf{x}\Vert_1 = \sum_i \lvert x_i \rvert$. Encourages sparsity when used as a regularizer.
 
 Cosine similarity, which normalizes vectors by their L2 norm before taking the dot product, is widely used in embedding search and retrieval:
 
 $$
 \text{cos-sim}(\mathbf{a}, \mathbf{b}) =
 \frac{\mathbf{a} \cdot \mathbf{b}}
-{\|\mathbf{a}\|_2 \, \|\mathbf{b}\|_2}
+{\Vert\mathbf{a}\Vert_2 \thinspace \Vert\mathbf{b}\Vert_2}
 $$
 
 ### Eigenvalues and Eigenvectors
@@ -103,30 +103,30 @@ At its core, a language model estimates a conditional probability distribution: 
 
 ### Probability Distributions
 
-A *probability distribution* assigns a probability to each possible outcome such that all probabilities sum to 1. For an LLM with vocabulary size $V$, the output at each time step is a *categorical distribution* over $V$ tokens: $P(x_t = v \mid x_{<t})$ for each $v$ in the vocabulary. The model must assign high probability to plausible next tokens and low probability to implausible ones.
+A *probability distribution* assigns a probability to each possible outcome such that all probabilities sum to 1. For an LLM with vocabulary size $V$, the output at each time step is a *categorical distribution* over $V$ tokens: $P(x_t = v \mid x_{\lt t})$ for each $v$ in the vocabulary. The model must assign high probability to plausible next tokens and low probability to implausible ones.
 
 ### Conditional Probability and the Chain Rule
 
 The probability of an entire sequence decomposes via the chain rule of probability:
 
 $$
-P(x_1, x_2, \ldots, x_T) = P(x_1) \cdot P(x_2 \mid x_1) \cdot P(x_3 \mid x_1, x_2) \cdots P(x_T \mid x_{<T})
+P(x_1, x_2, \ldots, x_T) = P(x_1) \cdot P(x_2 \mid x_1) \cdot P(x_3 \mid x_1, x_2) \cdots P(x_T \mid x_{\lt T})
 $$
 
-This is exactly what autoregressive (GPT-style) language models compute: each token's probability is conditioned on all previous tokens. Training the model to predict each $P(x_t \mid x_{<t})$ accurately is the objective of *causal language modeling*.
+This is exactly what autoregressive (GPT-style) language models compute: each token's probability is conditioned on all previous tokens. Training the model to predict each $P(x_t \mid x_{\lt t})$ accurately is the objective of *causal language modeling*.
 
 ### Maximum Likelihood Estimation
 
 How do we train the model? By finding parameters $\theta$ that maximize the likelihood of the training data:
 
 $$
-\theta^* = \arg\max_\theta \prod_{t=1}^{T} P_\theta(x_t \mid x_{<t})
+\theta^* = \arg\max_\theta \prod_{t=1}^{T} P_\theta(x_t \mid x_{\lt t})
 $$
 
 Taking the logarithm (which is monotonic, so it preserves the maximum) and flipping the sign gives us a *minimization* problem:
 
 $$
-\mathcal{L}(\theta) = -\sum_{t=1}^{T} \log P_\theta(x_t \mid x_{<t})
+\mathcal{L}(\theta) = -\sum_{t=1}^{T} \log P_\theta(x_t \mid x_{\lt t})
 $$
 
 This is the negative log-likelihood, and it is equivalent to the cross-entropy loss that every LLM minimizes during training.
@@ -154,14 +154,14 @@ When $P$ is the one-hot true label (the actual next token), cross-entropy simpli
 **KL divergence** measures how one distribution $Q$ differs from a reference distribution $P$:
 
 $$
-D_{\text{KL}}(P \| Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)}
+D_{\text{KL}}(P \Vert Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)}
 $$
 
-KL divergence is always non-negative and equals zero only when $P = Q$. It appears in RLHF (penalizing the policy from drifting too far from the reference model), in VAE training (regularizing the latent space), and in knowledge distillation (matching the student's distribution to the teacher's). Note that KL divergence is not symmetric: $D_{\text{KL}}(P \| Q) \neq D_{\text{KL}}(Q \| P)$ in general.
+KL divergence is always non-negative and equals zero only when $P = Q$. It appears in RLHF (penalizing the policy from drifting too far from the reference model), in VAE training (regularizing the latent space), and in knowledge distillation (matching the student's distribution to the teacher's). Note that KL divergence is not symmetric: $D_{\text{KL}}(P \Vert Q) \neq D_{\text{KL}}(Q \Vert P)$ in general.
 
 > **Interview takeaway:**
 >
-> Cross-entropy, KL divergence, and softmax appear in almost every generative AI interview. Be ready to write the formulas and explain what each term means in plain English. The connection between them: cross-entropy $= $ entropy $+$ KL divergence, which is why minimizing cross-entropy also minimizes the gap between predicted and true distributions.
+> Cross-entropy, KL divergence, and softmax appear in almost every generative AI interview. Be ready to write the formulas and explain what each term means in plain English. The connection between them: cross-entropy $=$ entropy $+$ KL divergence, which is why minimizing cross-entropy also minimizes the gap between predicted and true distributions.
 
 ### The Softmax Function
 
@@ -205,7 +205,7 @@ Probability tells the model what to predict. Linear algebra provides the represe
 The *derivative* $\frac{df}{dx}$ measures the rate of change of a function $f$ with respect to $x$. For a function of many variables (like a loss function depending on millions of weights), the *gradient* $\nabla_\theta \mathcal{L}$ is a vector of partial derivatives, one per parameter. The gradient points in the direction of steepest *ascent*, so to minimize the loss, we move in the opposite direction:
 
 $$
-\theta_{t+1} = \theta_t - \alpha \, \nabla_\theta \mathcal{L}(\theta_t)
+\theta_{t+1} = \theta_t - \alpha \thinspace \nabla_\theta \mathcal{L}(\theta_t)
 $$
 
 Here $\alpha$ is the *learning rate*, which controls the step size. Too large and training diverges; too small and training stalls.
@@ -272,7 +272,7 @@ For reference, here is the mathematical notation used throughout this book:
 - **Sets**: calligraphic ($\mathcal{D}$ for dataset, $\mathcal{V}$ for vocabulary)
 - **Distributions**: $P$, $Q$ for probability distributions; $\pi$ for policies (in RL context)
 - **Gradient**: $\nabla_\theta \mathcal{L}$ denotes the gradient of loss $\mathcal{L}$ with respect to parameters $\theta$
-- **Norms**: $\|\mathbf{x}\|_2$ for L2 (Euclidean), $\|\mathbf{x}\|_1$ for L1 (Manhattan)
+- **Norms**: $\Vert\mathbf{x}\Vert_2$ for L2 (Euclidean), $\Vert\mathbf{x}\Vert_1$ for L1 (Manhattan)
 - **Common operations**: $\odot$ for element-wise multiplication (Hadamard product), $\otimes$ for outer product, $\top$ for transpose
 - **Dimensions**: $B$ (batch size), $T$ (sequence length), $d$ (embedding dimension), $V$ (vocabulary size), $d_k$ (key/query dimension), $d_v$ (value dimension)
 
@@ -292,11 +292,11 @@ The key insight is that tensors provide a unified mathematical framework. Whethe
 
 #### Question 2. You mentioned vectors represent words. How do dot products measure similarity between word embeddings?
 
-The *dot product* of two vectors $\mathbf{a}$ and $\mathbf{b}$ is $\mathbf{a} \cdot \mathbf{b} = \sum_{i} a_i b_i$. Geometrically, it equals $\|\mathbf{a}\| \, \|\mathbf{b}\| \cos\theta$, where $\theta$ is the angle between the vectors. When two vectors point in similar directions ($\theta$ is small), $\cos\theta$ is close to 1 and the dot product is large. When they are orthogonal (unrelated), $\cos\theta = 0$.
+The *dot product* of two vectors $\mathbf{a}$ and $\mathbf{b}$ is $\mathbf{a} \cdot \mathbf{b} = \sum_{i} a_i b_i$. Geometrically, it equals $\Vert\mathbf{a}\Vert \thinspace \Vert\mathbf{b}\Vert \cos\theta$, where $\theta$ is the angle between the vectors. When two vectors point in similar directions ($\theta$ is small), $\cos\theta$ is close to 1 and the dot product is large. When they are orthogonal (unrelated), $\cos\theta = 0$.
 
 For word embeddings, this means semantically similar words have high dot products. If "king" and "queen" have similar embedding vectors, their dot product will be large, reflecting their semantic relatedness.
 
-In practice, we often normalize by vector magnitudes to get *cosine similarity*: $\text{cos_sim}(\mathbf{a}, \mathbf{b}) = \mathbf{a} \cdot \mathbf{b} / (\|\mathbf{a}\|_2 \|\mathbf{b}\|_2)$, which ranges from $-1$ (opposite) to $+1$ (identical direction). This is the standard similarity metric in embedding search, retrieval-augmented generation, and recommendation systems.
+In practice, we often normalize by vector magnitudes to get *cosine similarity*: $\text{cos-sim}(\mathbf{a}, \mathbf{b}) = \mathbf{a} \cdot \mathbf{b} / (\Vert\mathbf{a}\Vert_2 \Vert\mathbf{b}\Vert_2)$, which ranges from $-1$ (opposite) to $+1$ (identical direction). This is the standard similarity metric in embedding search, retrieval-augmented generation, and recommendation systems.
 
 The attention mechanism uses raw (unnormalized) dot products between query and key vectors: $\mathbf{q} \cdot \mathbf{k}$ measures how relevant key token $k$ is to query token $q$. Higher dot product means higher attention weight.
 
@@ -317,7 +317,7 @@ Self-attention computes a context-aware representation for each token by allowin
 **Step 1: Project into Q, K, V.** Given input embeddings $\mathbf{X} \in \mathbb{R}^{T \times d}$, compute:
 
 $$
-\mathbf{Q} = \mathbf{X}\mathbf{W}_Q,      \mathbf{K} = \mathbf{X}\mathbf{W}_K,      \mathbf{V} = \mathbf{X}\mathbf{W}_V
+\mathbf{Q} = \mathbf{X}\mathbf{W}_Q, \quad \mathbf{K} = \mathbf{X}\mathbf{W}_K, \quad \mathbf{V} = \mathbf{X}\mathbf{W}_V
 $$
 
 where $\mathbf{W}_Q, \mathbf{W}_K \in \mathbb{R}^{d \times d_k}$ and $\mathbf{W}_V \in \mathbb{R}^{d \times d_v}$. Queries represent "what am I looking for," keys represent "what do I contain," and values represent "what information do I carry."
@@ -341,7 +341,7 @@ Without this scaling, when $d_k$ is large (e.g., 64 or 128), dot products can be
 **Step 4: Apply causal mask** (for decoder models). Set future positions to $-\infty$ so that token $i$ cannot attend to tokens $j > i$:
 
 $$
-S_{ij} = -\infty      \text{for } j > i
+S_{ij} = -\infty \quad \text{for } j > i
 $$
 
 **Step 5: Softmax.** Normalize each row into a probability distribution:
@@ -369,7 +369,7 @@ The computational complexity is $O(T^2 \cdot d)$ for the $\mathbf{Q}\mathbf{K}^\
 A language model is, at its core, a probability estimator. Given a sequence of tokens $x_1, x_2, \ldots, x_{t-1}$, the model estimates a conditional probability distribution $P(x_t \mid x_1, \ldots, x_{t-1})$ over the entire vocabulary for the next token. The probability of a complete sentence is the product of these conditional probabilities:
 
 $$
-P(x_1, \ldots, x_T) = \prod_{t=1}^{T} P(x_t \mid x_{<t})
+P(x_1, \ldots, x_T) = \prod_{t=1}^{T} P(x_t \mid x_{\lt t})
 $$
 
 This decomposition is the *chain rule of probability*, and it is the mathematical foundation of autoregressive language modeling. GPT-style models are trained to estimate each of these conditional distributions as accurately as possible.
@@ -383,16 +383,16 @@ Every aspect of LLM behavior connects back to these probabilities: confident res
 *Maximum likelihood estimation* (MLE) is the principle behind LLM training: find model parameters $\theta$ that make the training data as probable as possible. Formally:
 
 $$
-\theta^* = \arg\max_\theta \prod_{t=1}^{T} P_\theta(x_t \mid x_{<t})
+\theta^* = \arg\max_\theta \prod_{t=1}^{T} P_\theta(x_t \mid x_{\lt t})
 $$
 
 In practice, we take the logarithm (turning the product into a sum) and negate it (turning maximization into minimization), giving us the *negative log-likelihood* loss:
 
 $$
-\mathcal{L}(\theta) = -\sum_{t=1}^{T} \log P_\theta(x_t \mid x_{<t})
+\mathcal{L}(\theta) = -\sum_{t=1}^{T} \log P_\theta(x_t \mid x_{\lt t})
 $$
 
-Each term $-\log P_\theta(x_t \mid x_{<t})$ measures how surprised the model is by the actual next token. If the model assigns probability 0.9 to the correct token, the loss is $-\log(0.9) \approx 0.105$ (small). If it assigns probability 0.01, the loss is $-\log(0.01) \approx 4.6$ (large). Training pushes the model to be less surprised by the training data.
+Each term $-\log P_\theta(x_t \mid x_{\lt t})$ measures how surprised the model is by the actual next token. If the model assigns probability 0.9 to the correct token, the loss is $-\log(0.9) \approx 0.105$ (small). If it assigns probability 0.01, the loss is $-\log(0.01) \approx 4.6$ (large). Training pushes the model to be less surprised by the training data.
 
 This negative log-likelihood is mathematically identical to *cross-entropy loss* when the true distribution is a one-hot vector (all probability on the correct token). So when you see "cross-entropy loss" in LLM training, it is MLE by another name.
 
@@ -410,7 +410,7 @@ Cross-entropy is the standard loss because of three properties:
 
 1. It is equivalent to maximum likelihood estimation, which has strong theoretical guarantees.
 1. Its gradient has a simple, well-behaved form: the gradient with respect to the logits is $(Q - P)$, the difference between predicted and true distributions. No exploding or vanishing gradient issues from the loss itself.
-1. It connects directly to information theory. Cross-entropy decomposes as $H(P, Q) = H(P) + D_{\text{KL}}(P \| Q)$. Since $H(P)$ (the entropy of the true distribution) is constant, minimizing cross-entropy is equivalent to minimizing KL divergence between the true and predicted distributions.
+1. It connects directly to information theory. Cross-entropy decomposes as $H(P, Q) = H(P) + D_{\text{KL}}(P \Vert Q)$. Since $H(P)$ (the entropy of the true distribution) is constant, minimizing cross-entropy is equivalent to minimizing KL divergence between the true and predicted distributions.
 
 In practice, cross-entropy is computed efficiently using the "log-softmax trick": instead of computing softmax and then taking the log, frameworks compute $\log(\text{softmax})$ in a numerically stable way using the log-sum-exp identity.
 
@@ -420,18 +420,18 @@ These three quantities form a family:
 
 **Entropy** $H(P) = -\sum_x P(x) \log P(x)$ measures the intrinsic uncertainty in a distribution. For a uniform distribution over $V$ tokens, entropy is $\log V$ (maximum uncertainty). For a one-hot distribution, entropy is 0 (no uncertainty).
 
-**KL divergence** $D_{\text{KL}}(P \| Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)}$ measures the extra bits needed to encode data from $P$ using the code designed for $Q$. It is always $\geq 0$ and equals 0 only when $P = Q$.
+**KL divergence** $D_{\text{KL}}(P \Vert Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)}$ measures the extra bits needed to encode data from $P$ using the code designed for $Q$. It is always $\geq 0$ and equals 0 only when $P = Q$.
 
-**Cross-entropy** ties them together: $H(P, Q) = H(P) + D_{\text{KL}}(P \| Q)$.
+**Cross-entropy** ties them together: $H(P, Q) = H(P) + D_{\text{KL}}(P \Vert Q)$.
 
 Since $H(P)$ is fixed (it depends only on the data), minimizing cross-entropy is equivalent to minimizing KL divergence. This explains why cross-entropy is the right training objective: it pushes the model's predicted distribution $Q$ as close as possible to the true distribution $P$.
 
 In generative AI beyond training loss, KL divergence appears in several places:
-- **RLHF**: the KL penalty $D_{\text{KL}}(\pi_\theta \| \pi_{\text{ref}})$ prevents the fine-tuned model from deviating too far from the reference model.
+- **RLHF**: the KL penalty $D_{\text{KL}}(\pi_\theta \Vert \pi_{\text{ref}})$ prevents the fine-tuned model from deviating too far from the reference model.
 - **Knowledge distillation**: the student model minimizes KL divergence between its output distribution and the teacher's output distribution.
-- **VAEs**: the latent space is regularized by $D_{\text{KL}}(q(\mathbf{z}|\mathbf{x}) \| p(\mathbf{z}))$, pushing the encoder distribution toward a standard Gaussian prior.
+- **VAEs**: the latent space is regularized by $D_{\text{KL}}(q(\mathbf{z} \mid \mathbf{x}) \Vert p(\mathbf{z}))$, pushing the encoder distribution toward a standard Gaussian prior.
 
-One important subtlety: KL divergence is *not* symmetric. $D_{\text{KL}}(P \| Q)$ (forward KL) penalizes $Q$ for assigning low probability where $P$ is high (mode-seeking). $D_{\text{KL}}(Q \| P)$ (reverse KL) penalizes $Q$ for assigning high probability where $P$ is low (mode-covering). Different applications choose different directions depending on their goals.
+One important subtlety: KL divergence is *not* symmetric. $D_{\text{KL}}(P \Vert Q)$ (forward KL) penalizes $Q$ for assigning low probability where $P$ is high (mode-seeking). $D_{\text{KL}}(Q \Vert P)$ (reverse KL) penalizes $Q$ for assigning high probability where $P$ is low (mode-covering). Different applications choose different directions depending on their goals.
 
 ### Thread 3: Softmax and Sampling
 
@@ -494,7 +494,7 @@ $$
 This gradient vector points in the direction of steepest increase of the loss. To reduce the loss, we move in the opposite direction:
 
 $$
-\theta_{t+1} = \theta_t - \alpha \, \nabla_\theta \mathcal{L}(\theta_t)
+\theta_{t+1} = \theta_t - \alpha \thinspace \nabla_\theta \mathcal{L}(\theta_t)
 $$
 
 where $\alpha$ is the learning rate. Each parameter gets its own partial derivative telling it exactly which direction to move and by how much. A parameter whose derivative is large has a big impact on the loss and gets a proportionally larger update.
@@ -552,9 +552,9 @@ When backpropagation applies the chain rule through many layers, it multiplies m
 
 Modern architectures use several solutions:
 
-- **Residual connections**: instead of $\mathbf{y} = f(\mathbf{x})$, compute $\mathbf{y} = f(\mathbf{x}) + \mathbf{x}$. The "$+ \mathbf{x}$" provides a gradient shortcut: during backpropagation, the gradient flows through both $f$ and the identity path, preventing it from vanishing even if $f$'s gradients are small. Every transformer layer uses residual connections.
+- **Residual connections**: instead of $\mathbf{y} = f(\mathbf{x})$, compute $\mathbf{y} = f(\mathbf{x}) + \mathbf{x}$. The $+\mathbf{x}$ term provides a gradient shortcut: during backpropagation, the gradient flows through both $f$ and the identity path, preventing it from vanishing even if $f$'s gradients are small. Every transformer layer uses residual connections.
 - **Layer normalization**: normalizes activations to have zero mean and unit variance within each layer, stabilizing the scale of both activations and gradients. Pre-norm (normalizing before each sub-layer) is the standard in modern LLMs.
-- **Gradient clipping**: caps the gradient norm at a maximum value (e.g., 1.0). If $\|\nabla_\theta \mathcal{L}\|_2 > \text{max_norm}$, scale it down: $\nabla \leftarrow \nabla \times \text{max_norm} / \|\nabla\|_2$. This prevents individual updates from being catastrophically large.
+- **Gradient clipping**: caps the gradient norm at a maximum value (e.g., 1.0). If $\Vert\nabla_\theta \mathcal{L}\Vert_2 > \text{max-norm}$, scale it down: $\nabla \leftarrow \nabla \times \text{max-norm} / \Vert\nabla\Vert_2$. This prevents individual updates from being catastrophically large.
 - **Careful initialization**: initializing weights with appropriate variance (Xavier/Glorot for tanh, He for ReLU) ensures that activations and gradients start at a reasonable scale.
 - **Better activations**: ReLU (derivative is 0 or 1) helps with vanishing gradients compared to sigmoid. GELU and SiLU, used in modern LLMs, have smooth non-zero gradients almost everywhere.
 
@@ -572,23 +572,23 @@ Here is the full mathematical pipeline for generating one token, following a sen
 
 **3. For each transformer layer $l = 1, \ldots, L$:**
 
-     **3a. Layer norm**: $\mathbf{X}_{\text{norm}} = \text{LayerNorm}(\mathbf{X}^{(l-1)})$
+**3a. Layer norm**: $\mathbf{X}_{\text{norm}} = \text{LayerNorm}(\mathbf{X}^{(l-1)})$
 
-     **3b. Multi-head attention**: For each head $h$:
-
-$$
-\mathbf{Q}_h = \mathbf{X}_{\text{norm}}\mathbf{W}_Q^h,      \mathbf{K}_h = \mathbf{X}_{\text{norm}}\mathbf{W}_K^h,      \mathbf{V}_h = \mathbf{X}_{\text{norm}}\mathbf{W}_V^h
-$$
+**3b. Multi-head attention**: For each head $h$:
 
 $$
-\text{head}_h = \text{softmax}\!\left(\frac{\mathbf{Q}_h\mathbf{K}_h^\top}{\sqrt{d_k}} + \mathbf{M}\right) \mathbf{V}_h
+\mathbf{Q}_h = \mathbf{X}_{\text{norm}}\mathbf{W}_Q^h, \quad \mathbf{K}_h = \mathbf{X}_{\text{norm}}\mathbf{W}_K^h, \quad \mathbf{V}_h = \mathbf{X}_{\text{norm}}\mathbf{W}_V^h
+$$
+
+$$
+\text{head}_h = \text{softmax}\left(\frac{\mathbf{Q}_h\mathbf{K}_h^\top}{\sqrt{d_k}} + \mathbf{M}\right) \mathbf{V}_h
 $$
 
 where $\mathbf{M}$ is the causal mask ($-\infty$ for future positions). Concatenate heads and project: $\text{MHA} = [\text{head}_1; \ldots; \text{head}_H]\mathbf{W}_O$.
 
-     **3c. Residual connection**: $\mathbf{X}^{(l)}_{\text{mid}} = \mathbf{X}^{(l-1)} + \text{MHA}$
+**3c. Residual connection**: $\mathbf{X}^{(l)}_{\text{mid}} = \mathbf{X}^{(l-1)} + \text{MHA}$
 
-     **3d. Feed-forward network** (with layer norm):
+**3d. Feed-forward network** (with layer norm):
 
 $$
 \text{FFN}(\mathbf{x}) = \mathbf{W}_2 \cdot \sigma(\mathbf{W}_1 \cdot \text{LayerNorm}(\mathbf{x}) + \mathbf{b}_1) + \mathbf{b}_2
@@ -596,9 +596,17 @@ $$
 
 where $\sigma$ is GELU or SiLU. The hidden dimension is typically $4d$ (expand then project back).
 
-     **3e. Residual connection**: $\mathbf{X}^{(l)} = \mathbf{X}^{(l)}_{\text{mid}} + \text{FFN}(\mathbf{X}^{(l)}_{\text{mid}})$
+**3e. Residual connection**:
 
-**4. Output projection.** After $L$ layers, the final hidden state for the last token is projected to vocabulary logits: $\mathbf{z} = \mathbf{X}^{(L)}_{T} \cdot \mathbf{W}_{\text{vocab}}^\top \in \mathbb{R}^V$.
+$$
+\mathbf{X}^{(l)} = \mathbf{X}^{(l)}_{\text{mid}} + \text{FFN}(\mathbf{X}^{(l)}_{\text{mid}})
+$$
+
+**4. Output projection.** After $L$ layers, the final hidden state for the last token is projected to vocabulary logits:
+
+$$
+\mathbf{z} = \mathbf{X}^{(L)}_{T} \cdot \mathbf{W}_{\text{vocab}}^\top \in \mathbb{R}^V
+$$
 
 **5. Softmax and sampling.** $P(x_{T+1}) = \text{softmax}(\mathbf{z} / T)$, then sample the next token.
 
@@ -611,7 +619,7 @@ Training follows a loop:
 **1. Forward pass**: take a batch of training sequences, run the full forward pass described above, and compute the cross-entropy loss at each token position:
 
 $$
-\mathcal{L} = -\frac{1}{T} \sum_{t=1}^{T} \log P_\theta(x_t \mid x_{<t})
+\mathcal{L} = -\frac{1}{T} \sum_{t=1}^{T} \log P_\theta(x_t \mid x_{\lt t})
 $$
 
 **2. Backward pass**: apply the chain rule (backpropagation) to compute $\nabla_\theta \mathcal{L}$, the gradient of the loss with respect to every parameter in the model. Frameworks like PyTorch do this automatically using a computational graph that was built during the forward pass.
@@ -619,7 +627,7 @@ $$
 **3. Optimizer step**: use an optimizer (typically AdamW) to update each parameter:
 
 $$
-\theta_{t+1} = \theta_t - \alpha \cdot \text{AdamW_update}(\nabla_\theta \mathcal{L}, \text{state})
+\theta_{t+1} = \theta_t - \alpha \cdot \text{AdamW-update}(\nabla_\theta \mathcal{L}, \text{state})
 $$
 
 AdamW maintains running averages of the gradient (momentum) and squared gradient (adaptive learning rate) for each parameter. It also applies weight decay (L2 regularization) separately from the gradient update. The ML Foundations chapter covers optimizer details.
@@ -636,7 +644,7 @@ Here are the notations and concepts you should be able to read, write, and expla
 
 **Core notation:**
 - Vectors ($\mathbf{x}$), matrices ($\mathbf{W}$), transpose ($\mathbf{A}^\top$), dot product ($\mathbf{a} \cdot \mathbf{b}$ or $\mathbf{a}^\top \mathbf{b}$)
-- Norms: $\|\mathbf{x}\|_2$, $\|\mathbf{x}\|_1$
+- Norms: $\Vert\mathbf{x}\Vert_2$, $\Vert\mathbf{x}\Vert_1$
 - Softmax: $\text{softmax}(z_i) = e^{z_i} / \sum_j e^{z_j}$
 - Gradient: $\nabla_\theta \mathcal{L}$, partial derivative $\partial \mathcal{L} / \partial \theta_i$
 
@@ -645,11 +653,11 @@ Here are the notations and concepts you should be able to read, write, and expla
 - Expectation: $\mathbb{E}[X] = \sum_x x \cdot P(x)$
 - Entropy: $H(P) = -\sum_x P(x) \log P(x)$
 - Cross-entropy: $H(P, Q) = -\sum_x P(x) \log Q(x)$
-- KL divergence: $D_{\text{KL}}(P \| Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)}$
+- KL divergence: $D_{\text{KL}}(P \Vert Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)}$
 
 **Attention:**
 - $\mathbf{Q} = \mathbf{X}\mathbf{W}_Q$, $\mathbf{K} = \mathbf{X}\mathbf{W}_K$, $\mathbf{V} = \mathbf{X}\mathbf{W}_V$
-- $\text{Attention} = \text{softmax}(\mathbf{Q}\mathbf{K}^\top / \sqrt{d_k}) \, \mathbf{V}$
+- $\text{Attention} = \text{softmax}(\mathbf{Q}\mathbf{K}^\top / \sqrt{d_k}) \thinspace \mathbf{V}$
 
 **Dimensions:**
 - $B$ (batch), $T$ (sequence length), $d$ (model/embedding dim), $V$ (vocabulary size)
